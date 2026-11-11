@@ -1,0 +1,43 @@
+name: pages
+
+on:
+  # deploy ulang setelah scan / backtest selesai (commit dari GITHUB_TOKEN tidak memicu "push")
+  workflow_run:
+    workflows: [scan, backtest]
+    types: [completed]
+  # deploy saat index.html atau config.json diubah
+  push:
+    branches: [main]
+    paths: [index.html, config.json, .github/workflows/pages.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Siapkan situs (hanya file yang dibutuhkan halaman)
+        run: |
+          mkdir -p _site/data
+          cp index.html config.json _site/
+          cp -r data/. _site/data/ 2>/dev/null || true
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
