@@ -1,0 +1,3 @@
+{"agen":"Scalp","topN":25,"costPct":0.2,"rr":1.8,"minRoomR":1.5,"maxCostR":0.25,"maxRiskPct":2.0,
+ "volMult":1.3,"pullVolMult":1.0,"trendSpreadPct":0.4,"rangeMaxPct":5,"btcAtrMaxPct":1.2,
+ "dailyCap":3,"stopAfterSL":2,"maxOpen":3,"dedupBars":8,"fillBars":12,"holdBars":48,"maxSignalAgeMin":30,"allowShort":true}
