@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mesin Scalp</title>
+<meta name="description" content="Dashboard forward test mesin analisis scalp kripto (bukan auto-trading).">
+<style>
+:root{
+  --bg:#f6f4ef; --panel:#ffffff; --ink:#1b1a17; --muted:#6d6a62; --line:#e3dfd5;
+  --accent:#0b6b5c; --accent-soft:#dff0ec;
+  --up:#0b7a4b; --down:#b3261e; --warn:#9a6700; --warn-soft:#fbf0d4;
+  --up-soft:#dcf2e5; --down-soft:#f9e0de;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#121311; --panel:#1b1d1a; --ink:#ecebe5; --muted:#9a9a90; --line:#2c2f2a;
+    --accent:#4fd1b5; --accent-soft:#16312c;
+    --up:#4fd18a; --down:#ff7b72; --warn:#e3b341; --warn-soft:#352c12;
+    --up-soft:#15301f; --down-soft:#3a1a18;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans)}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 64px}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+h1{font-size:22px;margin:0;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:13px}
+.banner{background:var(--warn-soft);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--warn);
+  border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:16px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:28px 0 10px;font-weight:600}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.grid{display:grid;gap:12px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.kpi .l{font-size:12px;color:var(--muted)}
+.kpi .v{font:600 24px/1.2 var(--mono);margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--muted);margin-top:2px}
+.pos{color:var(--up)} .neg{color:var(--down)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--line);white-space:nowrap}
+.pill.TREN_NAIK{background:var(--up-soft);color:var(--up)}
+.pill.TREN_TURUN{background:var(--down-soft);color:var(--down)}
+.pill.RANGE{background:var(--accent-soft);color:var(--accent)}
+.pill.LIAR,.pill.TIDAK_JELAS{background:var(--warn-soft);color:var(--warn)}
+.two{grid-template-columns:1fr}
+@media(min-width:820px){.two{grid-template-columns:1.6fr 1fr}}
+#chart{width:100%;height:auto;display:block;touch-action:none}
+.readout{font:12px var(--mono);color:var(--muted);min-height:18px;margin-top:6px}
+.check{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-top:1px solid var(--line)}
+.check:first-child{border-top:0;padding-top:0}
+.check .n{font-size:13px}
+.check .val{font:13px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.bar{grid-column:1/-1;height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--muted)}
+.check.ok .bar i{background:var(--up)}
+.check.ok .val{color:var(--up)}
+.open{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.sig .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sig .a{font:700 17px var(--mono)}
+.dir{font-size:12px;font-weight:700;padding:2px 8px;border-radius:6px}
+.dir.LONG{background:var(--up-soft);color:var(--up)} .dir.SHORT{background:var(--down-soft);color:var(--down)}
+.lv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:10px 0 6px;font:13px var(--mono)}
+.lv span:nth-child(even){text-align:right}
+.lv span:nth-child(odd){color:var(--muted)}
+.why{font-size:12px;color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:5px 11px;border-radius:999px;font:inherit;font-size:13px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+input[type=search]{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;min-width:0;width:140px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:13px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+td .why{display:block;max-width:360px;white-space:normal;margin-top:1px}
+.res{font-weight:700;font-size:12px}
+.res.TP{color:var(--up)} .res.SL{color:var(--down)} .res.menunggu{color:var(--warn)} .res.kedaluwarsa,.res.tidak_terisi{color:var(--muted)}
+button.more{margin-top:10px}
+pre.md{white-space:pre-wrap;font:12px/1.55 var(--mono);margin:0;color:var(--muted)}
+details summary{cursor:pointer;font-size:13px;color:var(--muted)}
+ul.log{margin:8px 0 0;padding-left:18px;font:12px/1.6 var(--mono)}
+.err{background:var(--down-soft);border:1px solid var(--line);border-left:4px solid var(--down);border-radius:8px;padding:12px 14px;font-size:14px}
+footer{margin-top:32px;color:var(--muted);font-size:12px}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Mesin Scalp</h1>
+      <div class="sub">Forward test sinyal scalping kripto &middot; pindai 25 koin USDT teratas tiap 15 menit</div>
+    </div>
+    <div class="sub" id="updated">Memuat data&hellip;</div>
+  </header>
+
+  <div class="banner"><strong>Hanya analisis, bukan saran keuangan.</strong> Mesin ini tidak mengeksekusi order. Strategi belum divalidasi; hasil di sini adalah simulasi pada candle tertutup, bukan jaminan hasil nyata.</div>
+
+  <div id="error" hidden></div>
+
+  <div id="app" hidden>
+    <section aria-label="Kondisi pasar">
+      <h2>Kondisi pasar</h2>
+      <div class="card" id="market"></div>
+    </section>
+
+    <section aria-label="Ringkasan hasil">
+      <h2>Ringkasan hasil (setelah biaya)</h2>
+      <div class="grid kpis" id="kpis"></div>
+    </section>
+
+    <section class="grid two" style="margin-top:28px">
+      <div>
+        <h2 style="margin-top:0">Kurva R kumulatif</h2>
+        <div class="card">
+          <svg id="chart" viewBox="0 0 640 240" role="img" aria-label="Kurva R kumulatif bersih"></svg>
+          <div class="readout" id="readout">Arahkan kursor atau sentuh grafik untuk melihat nilai.</div>
+        </div>
+      </div>
+      <div>
+        <h2 style="margin-top:0">Syarat sebelum uang sungguhan</h2>
+        <div class="card" id="gates"></div>
+      </div>
+    </section>
+
+    <section aria-label="Sinyal terbuka">
+      <h2>Sinyal terbuka</h2>
+      <div class="grid open" id="open"></div>
+    </section>
+
+    <section aria-label="Jurnal">
+      <h2>Jurnal sinyal</h2>
+      <div class="tools" id="tools">
+        <button class="chip" data-f="semua" aria-pressed="true">Semua</button>
+        <button class="chip" data-f="menunggu" aria-pressed="false">Terbuka</button>
+        <button class="chip" data-f="TP" aria-pressed="false">TP</button>
+        <button class="chip" data-f="SL" aria-pressed="false">SL</button>
+        <button class="chip" data-f="kedaluwarsa" aria-pressed="false">Kedaluwarsa</button>
+        <button class="chip" data-f="tidak terisi" aria-pressed="false">Tidak terisi</button>
+        <label class="sr" for="q">Cari aset</label>
+        <input id="q" type="search" placeholder="Cari aset">
+      </div>
+      <div class="scroll"><table>
+        <thead><tr>
+          <th>Waktu</th><th>Aset</th><th>Arah</th><th class="n">Entry</th><th class="n">SL</th><th class="n">TP</th>
+          <th class="n">Risiko</th><th>Hasil</th><th class="n">R bruto</th><th class="n">R bersih</th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table></div>
+      <button class="chip more" id="more" hidden>Tampilkan lebih banyak</button>
+    </section>
+
+    <section aria-label="Log dan laporan">
+      <h2>Siklus terakhir</h2>
+      <div class="card" id="report"></div>
+    </section>
+
+    <section id="btsec" hidden>
+      <h2>Backtest awal</h2>
+      <div class="card"><pre class="md" id="bt"></pre></div>
+    </section>
+  </div>
+
+  <footer>
+    Data dibaca dari <code>data/journal.json</code>, <code>data/report.md</code> dan <code>config.json</code> di repo ini. Halaman memuat ulang data otomatis tiap 5 menit.
+    R bersih = R bruto dikurangi biaya (biaya % &divide; jarak stop %), sama seperti perhitungan di laporan mesin.
+  </footer>
+</div>
+
+<script>
+(function(){
+'use strict';
+var FIN=['TP','SL','kedaluwarsa'];
+var state={rows:[],cfg:{costPct:0.2,fillBars:12,holdBars:48},filter:'semua',q:'',shown:50};
+
+function $(s){return document.querySelector(s)}
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function clear(n){while(n.firstChild)n.removeChild(n.firstChild)}
+function fmt(x,d){if(x==null||!isFinite(x))return '–';d=d==null?2:d;return x.toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function sgn(x,d){if(x==null||!isFinite(x))return '–';return (x>0?'+':'')+fmt(x,d)}
+function price(x){x=+x;if(!isFinite(x))return '–';var d=x>=1000?2:x>=100?3:x>=1?4:x>=0.1?5:6;return x.toLocaleString('id-ID',{maximumFractionDigits:d})}
+function cls(x){return x>0?'pos':x<0?'neg':''}
+function hhmm(ms){var d=new Date(ms);return d.toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}
+
+function getJSON(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' (HTTP '+r.status+')');return r.json()})}
+function getText(p){return fetch(p+'?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():null}).catch(function(){return null})}
+
+function netR(r,cost){var risk=Math.abs(r.entry-r.sl)/r.entry;return Number(r.R)-(cost/100)/risk}
+
+function compute(rows,cost){
+  var fin=rows.filter(function(r){return FIN.indexOf(r.hasil)>=0}).sort(function(a,b){return a.t0-b.t0});
+  var x=fin.map(function(r){return netR(r,cost)}),n=x.length,sum=x.reduce(function(s,v){return s+v},0),mean=n?sum/n:null;
+  var sd=null;if(n>1){sd=Math.sqrt(x.reduce(function(s,v){return s+(v-mean)*(v-mean)},0)/(n-1))}
+  var gp=0,gl=0;x.forEach(function(v){if(v>0)gp+=v;else gl-=v});
+  var pf=gl>0?gp/gl:(gp>0?Infinity:null);
+  var wins=x.filter(function(v){return v>0}).length;
+  var ciLow=(n>1&&sd!=null)?mean-1.96*sd/Math.sqrt(n):null;
+  var sqn=(n>1&&sd>0)?Math.sqrt(n)*mean/sd:null;
+  var first=rows.length?Math.min.apply(null,rows.map(function(r){return r.t0})):null;
+  var weeks=first?(Date.now()-first)/(7*864e5):0;
+  var curve=[],c=0;fin.forEach(function(r,i){c+=x[i];curve.push({t:r.t0,v:c,r:r,x:x[i]})});
+  return {fin:fin,n:n,sum:sum,mean:mean,sd:sd,pf:pf,wins:wins,ciLow:ciLow,sqn:sqn,weeks:weeks,curve:curve,
+    tp:fin.filter(function(r){return r.hasil==='TP'}).length,sl:fin.filter(function(r){return r.hasil==='SL'}).length,
+    open:rows.filter(function(r){return r.hasil==='menunggu'}).length,
+    unfilled:rows.filter(function(r){return r.hasil==='tidak terisi'}).length}
+}
+
+function parseReport(md){
+  if(!md)return null;
+  var o={log:[]},m;
+  if(m=md.match(/^# Mesin scalp (\S+)/m))o.time=m[1];
+  if(m=md.match(/Rezim BTC:\s*(\S+)\s*\(spread ([\d.,-]+)%,\s*range24 ([\d.,-]+)%,\s*ATR1h ([\d.,-]+)%\)/)){o.reg=m[1];o.spread=m[2];o.range=m[3];o.atr=m[4]}
+  if(m=md.match(/Terbuka:\s*(\d+);\s*kandidat siklus ini:\s*(\d+);\s*ditambahkan:\s*(\d+)/)){o.open=m[1];o.cand=m[2];o.added=m[3]}
+  if(m=md.match(/Hash kode:\s*(.+)/))o.hash=m[1].trim();
+  var i=md.indexOf('## Log');
+  if(i>=0)md.slice(i).split('\n').slice(1).forEach(function(l){l=l.replace(/^-\s*/,'').trim();if(l)o.log.push(l)});
+  return o;
+}
+
+var REGTXT={TREN_NAIK:'BTC tren naik: hanya sinyal LONG',TREN_TURUN:'BTC tren turun: hanya sinyal SHORT',RANGE:'BTC sideways: sinyal dua arah',
+  LIAR:'BTC terlalu bergejolak: tidak ada sinyal',TIDAK_JELAS:'Arah BTC belum jelas: tidak ada sinyal'};
+
+function renderMarket(rep){
+  var box=$('#market');clear(box);
+  if(!rep||!rep.reg){box.appendChild(el('div','empty','Belum ada laporan. Jalankan workflow scan dari tab Actions agar data/report.md terbentuk.'));return}
+  var top=el('div');top.style.cssText='display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center';
+  top.appendChild(el('span','pill '+rep.reg,rep.reg.replace('_',' ')));
+  top.appendChild(el('span','',REGTXT[rep.reg]||''));
+  box.appendChild(top);
+  var s=el('div','sub','Spread EMA20/50 '+rep.spread+'% · range 24 jam '+rep.range+'% · ATR 1 jam '+rep.atr+'% · kandidat siklus ini: '+(rep.cand||0)+' · ditambahkan: '+(rep.added||0));
+  s.style.marginTop='8px';box.appendChild(s);
+}
+
+function kpi(l,v,s,c){var d=el('div','card kpi');d.appendChild(el('div','l',l));d.appendChild(el('div','v '+(c||''),v));if(s)d.appendChild(el('div','s',s));return d}
+function renderKpis(S){
+  var k=$('#kpis');clear(k);
+  k.appendChild(kpi('Trade selesai',String(S.n),'TP '+S.tp+' · SL '+S.sl+' · kedaluwarsa '+(S.n-S.tp-S.sl)));
+  k.appendChild(kpi('R per trade (bersih)',S.mean==null?'–':sgn(S.mean,3),S.ciLow==null?'CI95 butuh ≥ 2 trade':'CI95 bawah: '+sgn(S.ciLow,3),cls(S.mean)));
+  k.appendChild(kpi('Total R (bersih)',S.n?sgn(S.sum,2):'–','',cls(S.sum)));
+  k.appendChild(kpi('Win rate',S.n?fmt(S.wins/S.n*100,0)+'%':'–','R bersih > 0'));
+  k.appendChild(kpi('Profit factor',S.pf==null?'–':(S.pf===Infinity?'∞':fmt(S.pf,2)),'SQN '+(S.sqn==null?'–':fmt(S.sqn,2))));
+  k.appendChild(kpi('Terbuka / tidak terisi',S.open+' / '+S.unfilled,'tidak terisi tidak dihitung'));
+}
+
+function renderGates(S){
+  var g=$('#gates');clear(g);
+  var items=[
+    {n:'Trade selesai ≥ 200',v:S.n+' / 200',p:S.n/200,ok:S.n>=200},
+    {n:'Durasi ≥ 8 minggu',v:fmt(S.weeks,1)+' / 8',p:S.weeks/8,ok:S.weeks>=8},
+    {n:'Batas bawah CI95 R/trade > 0',v:S.ciLow==null?'–':sgn(S.ciLow,3),p:S.ciLow==null?0:(S.ciLow>0?1:Math.max(0,1+S.ciLow)),ok:S.ciLow!=null&&S.ciLow>0},
+    {n:'Profit factor ≥ 1,2',v:S.pf==null?'–':(S.pf===Infinity?'∞':fmt(S.pf,2)),p:S.pf==null?0:Math.min(1,S.pf/1.2),ok:S.pf!=null&&S.pf>=1.2},
+    {n:'SQN ≥ 2',v:S.sqn==null?'–':fmt(S.sqn,2),p:S.sqn==null?0:Math.max(0,Math.min(1,S.sqn/2)),ok:S.sqn!=null&&S.sqn>=2}
+  ];
+  items.forEach(function(it){
+    var d=el('div','check'+(it.ok?' ok':''));
+    d.appendChild(el('div','n',(it.ok?'✓ ':'')+it.n));d.appendChild(el('div','val',it.v));
+    var b=el('div','bar'),i=document.createElement('i');i.style.width=Math.round(Math.max(0,Math.min(1,it.p))*100)+'%';b.appendChild(i);d.appendChild(b);
+    g.appendChild(d);
+  });
+  var allOk=items.every(function(i){return i.ok});
+  var note=el('div','sub',allOk?'Semua syarat terpenuhi pada data ini. Tetap bukan jaminan.':'Belum semua syarat terpenuhi. Jangan pakai uang sungguhan dulu.');
+  note.style.marginTop='10px';g.appendChild(note);
+}
+
+function renderChart(S){
+  var svg=$('#chart');clear(svg);
+  var W=640,H=240,pl=44,pr=12,pt=14,pb=24,ns='http://www.w3.org/2000/svg';
+  function mk(t,a){var e=document.createElementNS(ns,t);for(var k in a)e.setAttribute(k,a[k]);return e}
+  var pts=S.curve;
+  if(pts.length<1){
+    var t=mk('text',{x:W/2,y:H/2,'text-anchor':'middle',fill:'var(--muted)','font-size':14});
+    t.textContent='Belum ada trade selesai.';svg.appendChild(t);$('#readout').textContent='';return;
+  }
+  var ys=[0].concat(pts.map(function(p){return p.v})),lo=Math.min.apply(null,ys),hi=Math.max.apply(null,ys);
+  if(hi-lo<1){var mid=(hi+lo)/2;hi=mid+.5;lo=mid-.5}
+  var padv=(hi-lo)*.1;lo-=padv;hi+=padv;
+  var X=function(i){return pts.length===1?(pl+W-pr)/2:pl+(W-pl-pr)*i/(pts.length-1)},Y=function(v){return pt+(H-pt-pb)*(1-(v-lo)/(hi-lo))};
+  [lo+padv,0,hi-padv].forEach(function(v,i,a){
+    if(i===1&&(a[0]===0||a[2]===0))return;
+    svg.appendChild(mk('line',{x1:pl,x2:W-pr,y1:Y(v),y2:Y(v),stroke:'var(--line)','stroke-width':v===0?1.5:1,'stroke-dasharray':v===0?'':'3 4'}));
+    var t=mk('text',{x:pl-6,y:Y(v)+4,'text-anchor':'end',fill:'var(--muted)','font-size':11,'font-family':'ui-monospace,monospace'});t.textContent=fmt(v,1);svg.appendChild(t);
+  });
+  var d=pts.map(function(p,i){return (i?'L':'M')+X(i).toFixed(1)+' '+Y(p.v).toFixed(1)}).join(' ');
+  svg.appendChild(mk('path',{d:d+' L'+X(pts.length-1).toFixed(1)+' '+Y(0).toFixed(1)+' L'+X(0).toFixed(1)+' '+Y(0).toFixed(1)+' Z',fill:'var(--accent)','fill-opacity':.1}));
+  svg.appendChild(mk('path',{d:d,fill:'none',stroke:'var(--accent)','stroke-width':2,'stroke-linejoin':'round'}));
+  var last=pts[pts.length-1];
+  svg.appendChild(mk('circle',{cx:X(pts.length-1),cy:Y(last.v),r:4,fill:'var(--accent)'}));
+  var cur=mk('line',{y1:pt,y2:H-pb,stroke:'var(--muted)','stroke-width':1,visibility:'hidden'}),dot=mk('circle',{r:4.5,fill:'var(--bg)',stroke:'var(--accent)','stroke-width':2,visibility:'hidden'});
+  svg.appendChild(cur);svg.appendChild(dot);
+  var ro=$('#readout');ro.textContent='Total sekarang: '+sgn(last.v,2)+' R dari '+pts.length+' trade.';
+  function move(ev){
+    var r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)/r.width*W,i=pts.length===1?0:Math.round((px-pl)/(W-pl-pr)*(pts.length-1));
+    i=Math.max(0,Math.min(pts.length-1,i));var p=pts[i];
+    cur.setAttribute('x1',X(i));cur.setAttribute('x2',X(i));cur.setAttribute('visibility','visible');
+    dot.setAttribute('cx',X(i));dot.setAttribute('cy',Y(p.v));dot.setAttribute('visibility','visible');
+    ro.textContent='#'+(i+1)+' '+p.r.aset+' '+p.r.arah+' '+p.r.hasil+' · '+sgn(p.x,2)+' R · total '+sgn(p.v,2)+' R · '+hhmm(p.t);
+  }
+  svg.onpointermove=move;svg.onpointerdown=move;
+  svg.onpointerleave=function(){cur.setAttribute('visibility','hidden');dot.setAttribute('visibility','hidden');ro.textContent='Total sekarang: '+sgn(last.v,2)+' R dari '+pts.length+' trade.'};
+}
+
+function renderOpen(rows){
+  var box=$('#open');clear(box);
+  var open=rows.filter(function(r){return r.hasil==='menunggu'}).sort(function(a,b){return b.t0-a.t0});
+  if(!open.length){var e=el('div','empty','Tidak ada sinyal terbuka saat ini.');e.style.gridColumn='1/-1';box.appendChild(e);return}
+  open.forEach(function(r){
+    var c=el('div','card sig'),t=el('div','top');
+    t.appendChild(el('span','a',r.aset));t.appendChild(el('span','dir '+r.arah,r.arah));c.appendChild(t);
+    var lv=el('div','lv');
+    [['Entry (limit)',price(r.entry)],['Stop loss',price(r.sl)],['Take profit',price(r.tp)],
+     ['Risiko',fmt(Math.abs(r.entry-r.sl)/r.entry*100,2)+'%'],
+     ['Batal jika belum terisi',hhmm(r.t0+state.cfg.fillBars*5*6e4)]].forEach(function(p){lv.appendChild(el('span','',p[0]));lv.appendChild(el('span','',p[1]))});
+    c.appendChild(lv);
+    c.appendChild(el('div','why',(r.setup||'')+' · '+(r.alasan||'')));
+    box.appendChild(c);
+  });
+}
+
+function renderRows(){
+  var tb=$('#rows');clear(tb);
+  var q=state.q.trim().toUpperCase();
+  var list=state.rows.filter(function(r){return (state.filter==='semua'||r.hasil===state.filter)&&(!q||String(r.aset).toUpperCase().indexOf(q)>=0)}).sort(function(a,b){return b.t0-a.t0});
+  list.slice(0,state.shown).forEach(function(r){
+    var tr=document.createElement('tr'),fin=FIN.indexOf(r.hasil)>=0;
+    function td(t,c){var e=el('td',c||'',t);tr.appendChild(e);return e}
+    td(String(r.waktu||'').replace(' UTC',''));
+    var a=td(r.aset);var w=el('span','why',(r.setup||'')+(r.regime?' · '+r.regime:''));a.appendChild(w);
+    var d=td('');d.appendChild(el('span','dir '+r.arah,r.arah));
+    td(price(r.entry),'n');td(price(r.sl),'n');td(price(r.tp),'n');
+    td(fmt(Math.abs(r.entry-r.sl)/r.entry*100,2)+'%','n');
+    var h=td('');h.appendChild(el('span','res '+String(r.hasil).replace(' ','_'),r.hasil==='menunggu'?'terbuka':r.hasil));
+    td(fin?sgn(+r.R,2):'–','n '+(fin?cls(+r.R):''));
+    var nr=fin?netR(r,state.cfg.costPct):null;td(fin?sgn(nr,2):'–','n '+(fin?cls(nr):''));
+    tb.appendChild(tr);
+  });
+  if(!list.length){var tr=document.createElement('tr'),t=el('td','', state.rows.length?'Tidak ada sinyal yang cocok dengan filter.':'Jurnal masih kosong. Sinyal baru hanya muncul bila semua filter lolos, jadi kosong tidak berarti mesin mati.');t.colSpan=10;tr.appendChild(t);tb.appendChild(tr)}
+  $('#more').hidden=list.length<=state.shown;
+}
+
+function renderReport(rep){
+  var box=$('#report');clear(box);
+  if(!rep){box.appendChild(el('div','empty','data/report.md belum ada.'));return}
+  var ul=el('ul','log');
+  if(rep.log.length)rep.log.forEach(function(l){ul.appendChild(el('li','',l))});else ul.appendChild(el('li','','tidak ada kejadian'));
+  box.appendChild(ul);
+  if(rep.hash){var h=el('div','sub','Hash kode: '+rep.hash);h.style.marginTop='10px';box.appendChild(h)}
+}
+
+function showError(msg){var e=$('#error');e.className='err';e.hidden=false;clear(e);
+  e.appendChild(el('strong','','Data belum bisa dimuat. '));e.appendChild(document.createTextNode(msg));$('#app').hidden=true;$('#updated').textContent=''}
+
+function load(){
+  Promise.all([getJSON('data/journal.json'),getJSON('config.json').catch(function(){return null}),getText('data/report.md'),getText('data/backtest.md')])
+  .then(function(res){
+    var rows=res[0];if(!Array.isArray(rows))throw new Error('data/journal.json bukan daftar.');
+    rows=rows.filter(function(r){return r&&isFinite(+r.entry)&&isFinite(+r.sl)});
+    state.rows=rows;if(res[1])for(var k in res[1])state.cfg[k]=res[1][k];
+    var rep=parseReport(res[2]),S=compute(rows,state.cfg.costPct);
+    $('#error').hidden=true;$('#app').hidden=false;
+    renderMarket(rep);renderKpis(S);renderGates(S);renderChart(S);renderOpen(rows);renderRows();renderReport(rep);
+    if(res[3]){$('#btsec').hidden=false;$('#bt').textContent=res[3].replace(/^#.*\n/,'').trim()}
+    $('#updated').textContent=rep&&rep.time?'Siklus terakhir: '+hhmm(Date.parse(rep.time))+' (waktu lokal)':'Belum ada siklus scan';
+  }).catch(function(e){
+    showError(location.protocol==='file:'?'Buka lewat alamat GitHub Pages, bukan lewat file lokal ('+e.message+').':'Pastikan folder data/ ada di repo dan workflow scan sudah pernah jalan. Detail: '+e.message)
+  });
+}
+
+document.getElementById('tools').addEventListener('click',function(ev){
+  var b=ev.target.closest('.chip');if(!b)return;state.filter=b.getAttribute('data-f');state.shown=50;
+  document.querySelectorAll('#tools .chip').forEach(function(c){c.setAttribute('aria-pressed',c===b?'true':'false')});renderRows();
+});
+$('#q').addEventListener('input',function(e){state.q=e.target.value;state.shown=50;renderRows()});
+$('#more').addEventListener('click',function(){state.shown+=50;renderRows()});
+
+load();setInterval(load,5*60*1000);
+})();
+</script>
+</body>
+</html>
