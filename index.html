@@ -146,7 +146,7 @@ footer{margin-top:32px;color:var(--muted);font-size:12px}
       </div>
       <div class="scroll"><table>
         <thead><tr>
-          <th>Waktu</th><th>Aset</th><th>Arah</th><th class="n">Entry</th><th class="n">SL</th><th class="n">TP</th>
+          <th>Waktu analisis</th><th>Waktu hasil (UTC)</th><th>Aset</th><th>Arah</th><th class="n">Entry</th><th class="n">SL</th><th class="n">TP</th>
           <th class="n">Risiko</th><th>Hasil</th><th class="n">R bruto</th><th class="n">R bersih</th>
         </tr></thead>
         <tbody id="rows"></tbody>
@@ -328,6 +328,7 @@ function renderRows(){
     var tr=document.createElement('tr'),fin=FIN.indexOf(r.hasil)>=0;
     function td(t,c){var e=el('td',c||'',t);tr.appendChild(e);return e}
     td(String(r.waktu||'').replace(' UTC',''));
+    td(r.hasil!=='menunggu'&&r.tx?new Date(r.tx).toISOString().slice(0,16).replace('T',' '):'–');
     var a=td(r.aset);var w=el('span','why',(r.setup||'')+(r.regime?' · '+r.regime:''));a.appendChild(w);
     var d=td('');d.appendChild(el('span','dir '+r.arah,r.arah));
     td(price(r.entry),'n');td(price(r.sl),'n');td(price(r.tp),'n');
@@ -337,7 +338,7 @@ function renderRows(){
     var nr=fin?netR(r,state.cfg.costPct):null;td(fin?sgn(nr,2):'–','n '+(fin?cls(nr):''));
     tb.appendChild(tr);
   });
-  if(!list.length){var tr=document.createElement('tr'),t=el('td','', state.rows.length?'Tidak ada sinyal yang cocok dengan filter.':'Jurnal masih kosong. Sinyal baru hanya muncul bila semua filter lolos, jadi kosong tidak berarti mesin mati.');t.colSpan=10;tr.appendChild(t);tb.appendChild(tr)}
+  if(!list.length){var tr=document.createElement('tr'),t=el('td','', state.rows.length?'Tidak ada sinyal yang cocok dengan filter.':'Jurnal masih kosong. Sinyal baru hanya muncul bila semua filter lolos, jadi kosong tidak berarti mesin mati.');t.colSpan=11;tr.appendChild(t);tb.appendChild(tr)}
   $('#more').hidden=list.length<=state.shown;
 }
 

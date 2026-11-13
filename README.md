@@ -2,7 +2,7 @@
 
 Mesin ANALISIS (bukan auto-trading). Memindai 25 koin USDT teratas tiap 15 menit lewat GitHub Actions, mencatat sinyal ke `data/journal.json`, lalu menilainya sendiri pada candle 5 menit. Eksekusi tetap manual di Binance.
 
-STATUS: belum divalidasi. Uji kode lulus (16 uji), tetapi belum ada forward test maupun backtest pada data nyata.
+STATUS: belum divalidasi. Uji kode lulus (17 uji), tetapi belum ada forward test maupun backtest pada data nyata.
 
 ## Pasang (lewat GitHub web UI)
 1. Buat repo `scalp`, unggah semua file (termasuk `.github/workflows/`).
@@ -23,6 +23,7 @@ Format jurnal sudah kompatibel (diuji).
 - Gerbang biaya: biaya 0,2% harus <= 25% dari 1R, jadi stop minimal 0,8% dan maksimal 2%.
 - Ruang gerak: level terdekat harus >= 1,5R dari entry.
 - Proteksi: maks 3 sinyal/hari, berhenti setelah 2 SL, maks 3 posisi terbuka.
+- Jurnal menampilkan dua waktu: waktu analisis (kapan sinyal dibuat) dan waktu hasil (kapan TP/SL/kedaluwarsa/tidak terisi terjadi, UTC). Sinyal yang masih terbuka menampilkan tanda –.
 - Penilaian konservatif: SL didahulukan bila SL dan TP kena di candle yang sama; order batal bila tidak terisi 1 jam; keluar paksa setelah 4 jam.
 
 ## Kaitan dengan @eliz883 (dari teks postingan saja, tanpa chart)
