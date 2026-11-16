@@ -1,6 +1,6 @@
-# Mesin scalp 2026-11-16T01:25:20.290Z
+# Mesin scalp 2026-11-16T08:27:45.492Z
 
-Rezim BTC: TREN_TURUN (spread 1.40%, range24 6.4%, ATR1h 0.82%)
+Rezim BTC: RANGE (spread 1.13%, range24 3.5%, ATR1h 0.80%)
 Trade selesai: 3 (TP 0 / SL 3); R/trade bersih -1.194
 Terbuka: 0; kandidat siklus ini: 0; ditambahkan: 0
 Hash kode: core b52ddb136095 · sim 1e64b101e291 · config 3f45f6efb858
