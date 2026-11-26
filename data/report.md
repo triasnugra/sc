@@ -1,6 +1,6 @@
-# Mesin scalp 2026-11-26T02:54:05.300Z
+# Mesin scalp 2026-11-26T12:04:16.136Z
 
-Rezim BTC: LIAR (spread 0.15%, range24 7.1%, ATR1h 1.25%)
+Rezim BTC: TIDAK_JELAS (spread 0.34%, range24 7.1%, ATR1h 0.75%)
 Trade selesai: 5 (TP 1 / SL 4); R/trade bersih -0.639
 Terbuka: 0; kandidat siklus ini: 0; ditambahkan: 0
 Hash kode: core b52ddb136095 · sim 1e64b101e291 · config 3f45f6efb858
